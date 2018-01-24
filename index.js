@@ -1,20 +1,26 @@
-var express = require('express');
-var app = express();
+var express = require('express'),
+  app = express(),
+  port = process.env.PORT || 5000,
+  mongoose = require('mongoose'),
+  Task = require('./api/models/todoListModel'), //created model loading here
+  bodyParser = require('body-parser');
+  
+// mongoose instance connection url connection
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/userdb'); 
 
-app.set('port', (process.env.PORT || 5000));
 
-app.use(express.static(__dirname + '/public'));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-// views is directory for all template files
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
 
-app.get('/', function(request, response) {
-  response.render('pages/index');
+var routes = require('./api/routes/todoListRoutes'); //importing route
+routes(app); //register the route
+
+
+app.listen(port);
+
+app.use(function(req, res) {
+  res.status(404).send({url: req.originalUrl + ' not found'})
 });
-
-app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
-});
-
-
+console.log('todo list RESTful API server started on: ' + port);
